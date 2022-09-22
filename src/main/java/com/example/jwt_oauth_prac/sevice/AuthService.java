@@ -6,6 +6,7 @@ import com.example.jwt_oauth_prac.jwt.JwtProvider;
 import com.example.jwt_oauth_prac.jwt.dto.JwtDto;
 import com.example.jwt_oauth_prac.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +16,7 @@ import java.util.Objects;
 
 import static java.util.Objects.*;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -26,9 +28,11 @@ public class AuthService {
         Map<String, Object> attributes = oAuth2User.getAttributes();
 
         // 회원이 아닐 경우 회원 가입 처리를 한다.
-        if (attributes.get("sub") != null) {
-            if (!memberRepository.existsByEmail(attributes.get("sub").toString())) {
+        if (attributes.get("id") != null) {
+            if (!memberRepository.existsByAuthId(attributes.get("id").toString())) {
+
                 Member member = Member.builder()
+                        .authId((String) attributes.get("id"))
                         .email((String) attributes.get("sub"))
                         .name((String) attributes.get("name"))
                         .picture((String) attributes.get("picture"))

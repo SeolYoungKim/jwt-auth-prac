@@ -14,65 +14,80 @@ import java.util.Map;
 public class OAuthAttributes {
 
     private final Map<String, Object> attributes;
-    private final String nameAttributeKey;
+    private final String authId;
     private final String userName;
     private final String userEmail;
     private final String userPicture;
 
     @Builder
-    public OAuthAttributes(Map<String, Object> attributes, String nameAttributeKey, String userName, String userEmail, String userPicture) {
+    public OAuthAttributes(Map<String, Object> attributes, String authId, String userName, String userEmail, String userPicture) {
         this.attributes = attributes;
-        this.nameAttributeKey = nameAttributeKey;
+        this.authId = authId;
         this.userName = userName;
         this.userEmail = userEmail;
         this.userPicture = userPicture;
     }
 
-    public static OAuthAttributes of(String registrationId, String userNameAttributeName, Map<String, Object> attributes) {
+    public static OAuthAttributes of(String registrationId, Map<String, Object> attributes) {
 
-        if ("naver".equals(registrationId)) { // 이는 yml 파일에 적어준 registration id임. google, naver, kakao 셋중 하나임
-            return ofNaver("id", attributes);
+        switch (registrationId) {
+            case "naver":
+                return ofNaver(attributes);
+            case "kakao":
+                return ofKakao(attributes);
+            case "github":
+                return ofGitHub(attributes);
+            case "google":
+                return ofGoogle(attributes);
+            default:
+                throw new IllegalArgumentException("지원하지 않는 로그인 방식입니다.");
         }
 
-        if ("kakao".equals(registrationId)) {
-            return ofKakao("id", attributes);
-        }
-
-        return ofGoogle(userNameAttributeName, attributes);
     }
 
-    private static OAuthAttributes ofGoogle(String userNameAttributeName, Map<String, Object> attributes) {
+    private static OAuthAttributes ofGoogle(Map<String, Object> attributes) {
         return OAuthAttributes.builder()
+                .authId((String) attributes.get("sub"))
                 .userName((String) attributes.get("name"))
                 .userEmail((String) attributes.get("email"))
                 .userPicture((String) attributes.get("picture"))
                 .attributes(attributes)
-                .nameAttributeKey(userNameAttributeName)
                 .build();
     }
 
-    private static OAuthAttributes ofNaver(String userNameAttributeName, Map<String, Object> attributes) {
+
+    private static OAuthAttributes ofGitHub(Map<String, Object> attributes) {
+        return OAuthAttributes.builder()
+                .authId(String.valueOf(attributes.get("id")))
+                .userName((String) attributes.get("name"))
+                .userEmail((String) attributes.get("login"))  // github의 경우, email이 없을 수도 있기 때문에 "login"을 고유 식별자로 사용한다.
+                .userPicture((String) attributes.get("avatar_url"))
+                .attributes(attributes)
+                .build();
+    }
+
+    private static OAuthAttributes ofNaver(Map<String, Object> attributes) {
         Map<String, Object> response = (Map<String, Object>) attributes.get("response");
 
         return OAuthAttributes.builder()
+                .authId((String) response.get("id"))
                 .userName((String) response.get("name"))
                 .userEmail((String) response.get("email"))
                 .userPicture((String) response.get("profile_image"))
                 .attributes(response)
-                .nameAttributeKey(userNameAttributeName)
                 .build();
     }
 
-    private static OAuthAttributes ofKakao(String userNameAttributeName, Map<String, Object> attributes) {
+    private static OAuthAttributes ofKakao(Map<String, Object> attributes) {
         Map<String, Object> response = (Map<String, Object>) attributes.get("kakao_account");
         Map<String, Object> profile = (Map<String, Object>) response.get("profile");
 
         return OAuthAttributes.builder()
+                .authId(String.valueOf(attributes.get("id")))
                 .userName((String) profile.get("nickname"))
                 .userEmail((String) response.get("email"))
                 .userPicture((String) profile.get("profile_image_url"))
                 .attributes(attributes)
-                .nameAttributeKey(userNameAttributeName)
                 .build();
     }
 
@@ -80,6 +95,7 @@ public class OAuthAttributes {
     // Missing attribute 'sub' in attributes -> "sub"이라는 키의 attribute가 있어야 하는듯 ?
     public Map<String, Object> parsedAttributes() {
         Map<String, Object> map = new HashMap<>();
+        map.put("id", authId);
         map.put("sub", userEmail);
         map.put("name", userName);
         map.put("picture", userPicture);

@@ -1,21 +1,31 @@
 package com.example.jwt_oauth_prac.jwt;
 
 import com.example.jwt_oauth_prac.jwt.dto.JwtDto;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import com.nimbusds.oauth2.sdk.token.AccessTokenType;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
 import java.security.Key;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.*;
@@ -53,7 +63,7 @@ public class JwtProvider {
                 .collect(Collectors.joining(","));
 
         String accessToken = Jwts.builder()
-                .setSubject(requireNonNull(oAuth2User.getAttribute("sub")).toString())  // "sub" : "email"
+                .setSubject(requireNonNull(oAuth2User.getAttribute("id")).toString())
                 .claim(AUTHORITIES_KEY, authorities)
                 .setExpiration(accessTokenExpireTime)  // "exp" : 시간
                 .signWith(key, SignatureAlgorithm.HS512)  // "alg" : "HS512"
@@ -70,6 +80,54 @@ public class JwtProvider {
                 .refreshToken(refreshToken)
                 .accessTokenExpireTime(accessTokenExpireTime.getTime())
                 .build();
+    }
+
+    public String resolveToken(HttpServletRequest request) {
+        String bearerToken = request.getHeader(HttpHeaders.AUTHORIZATION);
+
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(AccessTokenType.BEARER.getValue())) {
+            return bearerToken.substring(7);
+        }
+
+        return "";
+    }
+
+    public Boolean validateAccessToken(String token) {
+        try {
+            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            return true;
+        } catch (SecurityException | MalformedJwtException e) {
+            log.info("올바르지 못한 토큰입니다.");
+        } catch (ExpiredJwtException e) {
+            log.info("만료된 토큰입니다.");
+        } catch (UnsupportedJwtException e) {
+            log.info("지원되지 않는 토큰입니다.");
+        } catch (IllegalArgumentException e) {
+            log.info("잘못된 토큰입니다.");
+        }
+
+        return true;
+    }
+
+    public Authentication findAuthentication(String accessToken) {
+        Claims claims = parseClaims(accessToken);
+
+        Collection<? extends GrantedAuthority> authorities =
+                Arrays.stream(claims.get(AUTHORITIES_KEY).toString().split(","))
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
+
+        User user = new User(claims.getSubject(), "", authorities);
+
+        return new UsernamePasswordAuthenticationToken(user, "", authorities);
+    }
+
+    private Claims parseClaims(String accessToken) {
+        try {
+            return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(accessToken).getBody();
+        } catch (ExpiredJwtException e) {
+            return e.getClaims();
+        }
     }
 
 
