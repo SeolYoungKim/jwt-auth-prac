@@ -27,6 +27,9 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private RoleType roleType;
 
+    //TODO: 토큰 값을 저장하는 곳이 필요하다. 아마 리프레쉬 토큰만 이용할 것으로 사료된다.
+    // 설계를 잘 해보도록 하자.
+
     @Builder
     public Member(String email, String name, String picture, RoleType roleType) {
         this.email = email;
