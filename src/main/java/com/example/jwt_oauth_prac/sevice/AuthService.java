@@ -4,9 +4,11 @@ import com.example.jwt_oauth_prac.domain.Member;
 import com.example.jwt_oauth_prac.domain.RoleType;
 import com.example.jwt_oauth_prac.jwt.JwtProvider;
 import com.example.jwt_oauth_prac.jwt.dto.JwtDto;
+import com.example.jwt_oauth_prac.jwt.dto.ReissueRequestDto;
 import com.example.jwt_oauth_prac.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,5 +46,14 @@ public class AuthService {
         }
 
         return jwtProvider.generateJwtDto(oAuth2User);
+    }
+
+    public JwtDto reissue(ReissueRequestDto reissueRequestDto) {
+
+        jwtProvider.validateRefreshToken(reissueRequestDto.getRefreshToken());
+
+        Authentication authentication = jwtProvider.findAuthentication(reissueRequestDto.getRefreshToken());
+
+        return jwtProvider.generateJwtDto(authentication.getName());
     }
 }

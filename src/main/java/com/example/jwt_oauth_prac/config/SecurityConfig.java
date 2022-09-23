@@ -39,6 +39,7 @@ public class SecurityConfig {
 
                 .and()
                 .authorizeRequests(request -> request
+                        .antMatchers("/auth/reissue").permitAll()
                         .antMatchers("/guest").hasRole(RoleType.USER.name())
                         .antMatchers("/admin").hasRole(RoleType.ADMIN.name()))
                 .oauth2Login(login -> login

@@ -1,5 +1,9 @@
 package com.example.jwt_oauth_prac.config.auth;
 
+import com.example.jwt_oauth_prac.domain.Member;
+import com.example.jwt_oauth_prac.domain.RoleType;
+import com.example.jwt_oauth_prac.repository.MemberRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -11,7 +15,10 @@ import org.springframework.stereotype.Service;
 import java.util.Collections;
 
 @Service
+@RequiredArgsConstructor
 public class CustomUserDetailService extends DefaultOAuth2UserService {
+
+    private final MemberRepository memberRepository;
 
     /**
      * TODO: 로그인 요청 시에만 작동한다. !!!!!!!
@@ -21,7 +28,7 @@ public class CustomUserDetailService extends DefaultOAuth2UserService {
      * TODO: 여기서 현재 접속한 유저의 UserDetails를 OAuth2User의 형태로 반환을 한다.
      * 그렇기 때문에, 여기서 기존 회원의 토큰이나 정보를 비교하는 로직이 필요할 것 같다. 비교해서 접속한 유저의 정보에 맞는 값을 반환해줘야 하기 때문이다.
      * CustomOAuth2User 객체를 만들어서, 토큰을 가진 형태의 UserDetails를 만들 수는 없을까? 한번 해보자.
-     *
+     * <p>
      * 무엇보다 이 Service 객체는 "SecurityContext"라는 메모리에 유저를 저장하는 역할만 한다.(로그인 요청 시 인증 후)
      */
     @Override
@@ -45,6 +52,8 @@ public class CustomUserDetailService extends DefaultOAuth2UserService {
         OAuthAttributes attr
                 = OAuthAttributes.of(registrationId, oAuth2User.getAttributes());
 
+        saveOrSearch(attr);
+
         //TODO: 여기서 접속요청한 유저의 email주소를 기반으로 유저를 찾는다. 회원가입 돼있으면 기성 정보를 이용해서 권한과 토큰값등을 할당한다.
         // 토큰이 만료되었을 수도 있다.(기간 확인) -> 그렇다면 토큰을 재발급 해주는 로직이 필요하다. 여기서 하는게 맞나?
         // 아니면 필터를 하나 추가해서 거기서 작업하고 여기로 값을 넘겨주는게 나을까? 공부를 더 해보자.
@@ -62,5 +71,21 @@ public class CustomUserDetailService extends DefaultOAuth2UserService {
                 attr.parsedAttributes(),
                 "id" // 이 값은, attribute에 접근 가능한 key 값이다. 지금은 형식을 전부 통일했으므로 id로 변경했다. 문제 시 다시설계함.
         );
+    }
+
+    private void saveOrSearch(OAuthAttributes oAuthAttributes) {
+        String authId = oAuthAttributes.getAuthId();
+
+        Member member = memberRepository.findByAuthId(authId)
+                .orElseGet(() -> Member.builder()
+                        .authId(authId)
+                        .roleType(RoleType.USER)
+                        .name(oAuthAttributes.getUserName())
+                        .email(oAuthAttributes.getUserEmail())
+                        .picture(oAuthAttributes.getUserPicture())
+                        .refreshToken("")
+                        .build());
+
+        memberRepository.save(member);
     }
 }

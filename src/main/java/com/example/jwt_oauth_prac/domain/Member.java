@@ -46,4 +46,6 @@ public class Member {
         this.roleType = roleType;
         this.refreshToken = refreshToken;
     }
+
+
 }
