@@ -1,5 +1,6 @@
 package com.example.jwt_oauth_prac.config.auth.custom;
 
+import com.example.jwt_oauth_prac.domain.Member;
 import lombok.Builder;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -18,6 +19,9 @@ public class CustomOAuth2User implements OAuth2User {
     private final String name;  // AttibuteKey
     private final String accessToken;
     private final String refreshToken;
+
+    //아래와 같이 Member 엔티티를 직접 상속받아 진행해도 된다.
+    //private Member member;
 
     @Builder
     public CustomOAuth2User(Map<String, Object> attributes, Collection<? extends GrantedAuthority> authorities,

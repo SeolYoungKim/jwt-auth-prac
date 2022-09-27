@@ -4,9 +4,11 @@ import com.example.jwt_oauth_prac.jwt.dto.JwtDto;
 import com.example.jwt_oauth_prac.jwt.dto.ReissueRequestDto;
 import com.example.jwt_oauth_prac.sevice.AuthService;
 import com.example.jwt_oauth_prac.web.dto.RequestDto;
+import com.example.jwt_oauth_prac.web.dto.TokenDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -39,7 +41,7 @@ public class AuthController {
     }
 
     @PostMapping("/test")
-    public String test1(@RequestBody RequestDto naverDto) {
+    public TokenDto test1(@RequestBody RequestDto naverDto) {
         // ㅇㅕ기서도 받아온 값을 네이버에 POST로 보내고, 정보를 받아오는 것 까지 해보자.
         log.info("code = {}", naverDto.getCode());
         log.info("state = {}", naverDto.getState());
@@ -57,14 +59,18 @@ public class AuthController {
                 .queryParam("state", naverDto.getState())
                 .build();
 
-
         // 받아온 값을 네이버에 쏴준다. url 형식을 지켜서!
-        // code랑 state를 전달 받는것까지는 되는데, 이 아래의 것을 수행하려고하면 안됨ㅋㅋ ㅠㅠ
-        return webClient.get()
-                .uri(uri.toString())
+        // 엑... 할당이 안되네 ㅠ 왜지 ㅠ
+        TokenDto tokenDtoMono = webClient.get()
+                .uri(uri.toString()).accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .bodyToMono(String.class)
+                .bodyToMono(TokenDto.class)
                 .block();
 
+
+        log.info("what is tokenDtoMono? = {}", tokenDtoMono.getAccessToken());  // 오 값이 받아진다!
+
+        // 그렇다면 받은 값의 access 토큰만 얻어내서 다시 naver에 쏜다.
+        return tokenDtoMono;
     }
 }
