@@ -60,17 +60,29 @@ public class AuthController {
                 .build();
 
         // 받아온 값을 네이버에 쏴준다. url 형식을 지켜서!
-        // 엑... 할당이 안되네 ㅠ 왜지 ㅠ
+        // 엑... 할당이 안되네 ㅠ 왜지 ㅠ -> POST로 날리고 POST로 받아보자. -> 어림도없지
+        // 이름을 JSON 데이터 형식과 똑같이 바꿔주니까 바인딩이 잘 된다!! (카멜 타입 적용 안됨..ㅠ)
         TokenDto tokenDtoMono = webClient.get()
                 .uri(uri.toString()).accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .bodyToMono(TokenDto.class)
                 .block();
 
-
-        log.info("what is tokenDtoMono? = {}", tokenDtoMono.getAccessToken());  // 오 값이 받아진다!
+        log.info("what is tokenDtoMono? = {}", tokenDtoMono.getAccess_token());  // 오 값이 받아진다!
 
         // 그렇다면 받은 값의 access 토큰만 얻어내서 다시 naver에 쏜다.
+        String userData = webClient.get()
+                .uri("https://openapi.naver.com/v1/nid/me")
+                .header("Authorization", "Bearer " + tokenDtoMono.getAccess_token())
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
+
+        log.info("what is userData? = {}", userData);
+
+        // 주고 받는거 전부 성공!! 근데, 음.. 인증으로 어떻게 연결을 하지?
+        // 이것은 Security랑 WebClient 공부가 더 필요한듯.
+
         return tokenDtoMono;
     }
 }

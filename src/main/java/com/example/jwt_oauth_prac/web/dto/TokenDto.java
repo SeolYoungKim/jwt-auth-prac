@@ -9,16 +9,16 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class TokenDto {
 
-    private String accessToken;
-    private String refreshToken;
-    private String tokenType;
-    private String expiresIn;
+    private String access_token;
+    private String refresh_token;
+    private String token_type;
+    private String expires_in;
 
     @Builder
-    public TokenDto(String accessToken, String refreshToken, String tokenType, String expiresIn) {
-        this.accessToken = accessToken;
-        this.refreshToken = refreshToken;
-        this.tokenType = tokenType;
-        this.expiresIn = expiresIn;
+    public TokenDto(String access_token, String refresh_token, String token_type, String expires_in) {
+        this.access_token = access_token;
+        this.refresh_token = refresh_token;
+        this.token_type = token_type;
+        this.expires_in = expires_in;
     }
 }
