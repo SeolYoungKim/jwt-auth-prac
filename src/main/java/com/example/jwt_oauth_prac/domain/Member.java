@@ -47,5 +47,8 @@ public class Member {
         this.refreshToken = refreshToken;
     }
 
+    public String getRoleTypeKey() {
+        return roleType.getKey();
+    }
 
 }

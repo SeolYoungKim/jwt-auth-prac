@@ -26,9 +26,15 @@ public class JwtFilter extends OncePerRequestFilter {
         // 토큰이 있고, 만료가 되지 않았다면
         if (StringUtils.hasText(jwt) && jwtProvider.validateAccessToken(jwt)) {
             Authentication authentication = jwtProvider.findAuthentication(jwt);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            SecurityContextHolder.getContext().setAuthentication(authentication);  // 인증 객체 등록
         }
 
         filterChain.doFilter(request, response);
     }
+
+    // TODO: /auth 일 때만 해당 필터가 동작하도록 변경
+//    @Override
+//    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+//        return super.shouldNotFilter(request);
+//    }
 }

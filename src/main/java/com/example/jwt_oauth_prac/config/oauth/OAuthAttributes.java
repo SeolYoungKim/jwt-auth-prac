@@ -1,4 +1,4 @@
-package com.example.jwt_oauth_prac.config.auth;
+package com.example.jwt_oauth_prac.config.oauth;
 
 import lombok.Builder;
 import lombok.Getter;

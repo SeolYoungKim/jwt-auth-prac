@@ -58,6 +58,23 @@ public class JwtProvider {
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
+    // TEST용
+    public String createJwt(OAuth2User oAuth2User) {
+        long now = new Date().getTime();
+        Date accessTokenExpireTime = new Date(now + ACCESS_TOKEN_EXPIRE_TIME);
+
+        String authorities = oAuth2User.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(","));
+
+        return Jwts.builder()
+                .setSubject(requireNonNull(oAuth2User.getAttribute("id")).toString())
+                .claim(AUTHORITIES_KEY, authorities)
+                .setExpiration(accessTokenExpireTime)  // "exp" : 시간
+                .signWith(key, SignatureAlgorithm.HS512)  // "alg" : "HS512"
+                .compact();
+    }
+
     // 현재 로그인한 유저의 정보를 기반으로, Jwt 토큰을 생성 -> 얘를 이제 Member에 저장하고 관리하는 등의 로직이 필요!
     public JwtDto generateJwtDto(OAuth2User oAuth2User) {
         long now = new Date().getTime();

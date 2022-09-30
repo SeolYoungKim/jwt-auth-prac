@@ -6,7 +6,8 @@ import lombok.Getter;
 public enum RoleType {
 
     ADMIN("ROLE_ADMIN", "관리자"),
-    USER("ROLE_USER", "일반 유저");
+    USER("ROLE_USER", "일반 유저"),
+    GUEST("ROLE_GUEST", "게스트");
 
     private final String key;
     private final String desc;

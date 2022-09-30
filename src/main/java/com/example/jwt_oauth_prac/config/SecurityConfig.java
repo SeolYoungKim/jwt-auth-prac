@@ -1,6 +1,7 @@
 package com.example.jwt_oauth_prac.config;
 
-import com.example.jwt_oauth_prac.config.auth.CustomUserDetailService;
+import com.example.jwt_oauth_prac.config.oauth.handler.OAuth2LoginSuccessHandler;
+import com.example.jwt_oauth_prac.config.oauth.service.CustomUserDetailService;
 import com.example.jwt_oauth_prac.domain.RoleType;
 import com.example.jwt_oauth_prac.jwt.JwtFilter;
 import com.example.jwt_oauth_prac.jwt.JwtProvider;
@@ -21,6 +22,7 @@ public class SecurityConfig {
 
     private final CustomUserDetailService customUserDetailService;
     private final JwtProvider jwtProvider;
+    private final OAuth2LoginSuccessHandler loginSuccessHandler;
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
@@ -46,9 +48,10 @@ public class SecurityConfig {
                         .userInfoEndpoint()
                         .userService(customUserDetailService)
                         .and()
-                        .defaultSuccessUrl("/api/auth/login")
-                        .failureUrl("/fail"))
-                .addFilterBefore(new JwtFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class);
+                        .successHandler(loginSuccessHandler));
+//                        .defaultSuccessUrl("/api/auth/login")
+//                        .failureUrl("/fail"));
+//                .addFilterBefore(new JwtFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
 

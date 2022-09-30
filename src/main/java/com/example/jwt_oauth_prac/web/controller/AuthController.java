@@ -73,7 +73,7 @@ public class AuthController {
         // 그렇다면 받은 값의 access 토큰만 얻어내서 다시 naver에 쏜다.
         String userData = webClient.get()
                 .uri("https://openapi.naver.com/v1/nid/me")
-                .header("Authorization", "Bearer " + tokenDtoMono.getAccess_token())
+                .headers(h -> h.setBearerAuth(tokenDtoMono.getAccess_token()))
                 .retrieve()
                 .bodyToMono(String.class)
                 .block();
@@ -82,6 +82,8 @@ public class AuthController {
 
         // 주고 받는거 전부 성공!! 근데, 음.. 인증으로 어떻게 연결을 하지?
         // 이것은 Security랑 WebClient 공부가 더 필요한듯.
+        // 이렇게도 어거지로는 구성이 될 것 같은데.. "책임"의 분리가 안된다.. 그렇게 되면 유지보수 빡세진다..
+        // 꼭 스프링 시큐리티를 적용 해보도록 하자!
 
         return tokenDtoMono;
     }

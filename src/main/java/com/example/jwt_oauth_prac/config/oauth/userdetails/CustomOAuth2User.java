@@ -1,6 +1,5 @@
-package com.example.jwt_oauth_prac.config.auth.custom;
+package com.example.jwt_oauth_prac.config.oauth.userdetails;
 
-import com.example.jwt_oauth_prac.domain.Member;
 import lombok.Builder;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;

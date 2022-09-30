@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class TokenDto {
 
+    // JSON key와 완전 동일한 형태여야 받아와진다.
+
     private String access_token;
     private String refresh_token;
     private String token_type;
