@@ -1,4 +1,4 @@
-package com.example.jwt_oauth_prac.web.dto;
+package com.example.jwt_oauth_prac.config.oauth.handler.dto;
 
 import lombok.AccessLevel;
 import lombok.Builder;

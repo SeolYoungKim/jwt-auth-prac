@@ -48,10 +48,8 @@ public class SecurityConfig {
                         .userInfoEndpoint()
                         .userService(customUserDetailService)
                         .and()
-                        .successHandler(loginSuccessHandler));
-//                        .defaultSuccessUrl("/api/auth/login")
-//                        .failureUrl("/fail"));
-//                .addFilterBefore(new JwtFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class);
+                        .successHandler(loginSuccessHandler))
+                .addFilterBefore(new JwtFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
 

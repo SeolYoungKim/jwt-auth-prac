@@ -35,20 +35,29 @@ public class Member {
     //TODO: 토큰 값을 저장하는 곳이 필요하다. 아마 리프레쉬 토큰만 이용할 것으로 사료된다.
     // 설계를 잘 해보도록 하자.
     @Column
+    private String accessToken;
+
+    @Column
     private String refreshToken;
 
     @Builder
-    public Member(String authId, String email, String name, String picture, RoleType roleType, String refreshToken) {
+    public Member(String authId, String email, String name, String picture, RoleType roleType, String accessToken, String refreshToken) {
         this.authId = authId;
         this.email = email;
         this.name = name;
         this.picture = picture;
         this.roleType = roleType;
+        this.accessToken = accessToken;
         this.refreshToken = refreshToken;
     }
 
     public String getRoleTypeKey() {
         return roleType.getKey();
+    }
+
+    public void saveToken(String accessToken, String refreshToken) {
+        this.accessToken = accessToken;
+        this.refreshToken = refreshToken;
     }
 
 }
